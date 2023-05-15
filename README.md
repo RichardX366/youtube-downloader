@@ -15,3 +15,8 @@ document
   .forEach((x) => links.push(x.href.split('=')[1].split('&')[0]));
 console.log(links.join(','));
 ```
+
+# Shortcut
+
+1. Add `alias yt-download="node ~/PROJECT_ROOT/dist"` to your .bashrc or .zshrc
+2. Run `yt-download VIDEO_IDS` to download the videos and generate the subtitles
