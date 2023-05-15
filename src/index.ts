@@ -70,16 +70,16 @@ const prompt = async (text: string) => {
 };
 
 const downloadImage = async (url: string, path: string) => {
-  const { data: response } = await axios({
+  const { data: response } = (await axios({
     method: 'GET',
     url,
     responseType: 'stream',
-  });
+  })) as { data: NodeJS.ReadableStream };
 
-  response.pipe(createWriteStream(path));
-  return new Promise<void>((res) => {
-    response.on('end', () => res());
-  });
+  const stream = createWriteStream(path);
+  response.pipe(stream);
+
+  return new Promise<void>((res) => stream.on('finish', res));
 };
 
 const logUpdate = (text: string) => {
