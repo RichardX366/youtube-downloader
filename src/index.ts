@@ -12,8 +12,10 @@ import { config } from 'dotenv';
 import { Configuration, OpenAIApi } from 'openai';
 import axios from 'axios';
 
+const outDir = __dirname + '/../out';
+
 config();
-if (!existsSync('./out')) mkdirSync('./out');
+if (!existsSync(outDir)) mkdirSync(outDir);
 
 let cost = 0;
 const ETAs: { [id: string]: number } = {};
@@ -30,11 +32,10 @@ const songs: {
 
 const YD = new downloader({
   ffmpegPath: '/usr/local/bin/ffmpeg',
-  outputPath: './out',
+  outputPath: outDir,
   youtubeVideoQuality: 'highestaudio',
   queueParallelism: 999,
   progressTimeout: 1000,
-  allowWebm: true,
 });
 
 const configuration = new Configuration({
@@ -117,20 +118,23 @@ const handleSong = async (
     .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 
-  renameSync(songs[i].file, `./out/${title}.mp3`);
+  renameSync(songs[i].file, `${outDir}/${title}.mp3`);
 
-  await downloadImage(songs[i].thumbnail.split('?')[0], `./out/${title}.jpg`);
+  await downloadImage(
+    songs[i].thumbnail.split('?')[0],
+    `${outDir}/${title}.jpg`,
+  );
 
   await id3.write(
     {
       title: title,
       artist: artist,
-      APIC: `./out/${title}.jpg`,
+      APIC: `${outDir}/${title}.jpg`,
     } as any,
-    `./out/${title}.mp3`,
+    `${outDir}/${title}.mp3`,
   );
 
-  unlinkSync(`./out/${title}.jpg`);
+  unlinkSync(`${outDir}/${title}.jpg`);
 };
 
 const ids = process.argv[2].split(',');
