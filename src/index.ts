@@ -14,7 +14,7 @@ import axios from 'axios';
 
 const outDir = __dirname + '/../out';
 
-config();
+config({ path: __dirname + '/../.env' });
 if (!existsSync(outDir)) mkdirSync(outDir);
 
 let cost = 0;
