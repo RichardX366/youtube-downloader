@@ -1,4 +1,4 @@
-import downloader from 'youtube-mp3-downloader';
+import { Downloader } from 'ytdl-mp3';
 import { Promise as id3 } from 'node-id3';
 import deepL from 'deepl';
 import {
@@ -18,24 +18,10 @@ config({ path: __dirname + '/../.env' });
 if (!existsSync(outDir)) mkdirSync(outDir);
 
 let cost = 0;
-const ETAs: { [id: string]: number } = {};
-const songs: {
-  videoId: string;
-  stats: { transferredBytes: number; runtime: number; averageSpeed: number };
-  file: string;
-  youtubeUrl: string;
-  videoTitle: string;
-  artist: string;
-  title: string;
-  thumbnail: string;
-}[] = [];
+const files: string[] = [];
 
-const YD = new downloader({
-  ffmpegPath: '/usr/local/bin/ffmpeg',
-  outputPath: outDir,
-  youtubeVideoQuality: 'highestaudio',
-  queueParallelism: 999,
-  progressTimeout: 1000,
+const downloader = new Downloader({
+  outputDir: outDir,
 });
 
 const configuration = new Configuration({
@@ -83,30 +69,6 @@ const downloadImage = async (url: string, path: string) => {
   return new Promise<void>((res) => stream.on('finish', res));
 };
 
-const logUpdate = (text: string) => {
-  process.stdout.clearLine(0);
-  process.stdout.cursorTo(0);
-  process.stdout.write(text);
-};
-
-YD.on('progress', (progress) => {
-  ETAs[progress.videoId] = progress.progress.eta;
-  logUpdate(`ETA: ${Math.round(Math.max(...Object.values(ETAs)))} seconds`);
-});
-
-YD.on('finished', async (err, data) => {
-  songs.push(data);
-  if (songs.length !== ids.length) return;
-
-  const processedSongs = JSON.parse(
-    await prompt(`Print the pure titles and artists without feat/ft of the following songs in original order and the format [{"title":TITLE,"artist":ARTIST},...]
-${await translate(songs.map((song) => song.videoTitle).join('\n'))}`),
-  ) as [];
-
-  await Promise.all(processedSongs.map(handleSong));
-  logUpdate('Done!\n');
-});
-
 const handleSong = async (
   song: { title: string; artist: string },
   i: number,
@@ -118,10 +80,10 @@ const handleSong = async (
     .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 
-  renameSync(songs[i].file, `${outDir}/${title}.mp3`);
+  renameSync(files[i], `${outDir}/${title}.mp3`);
 
   await downloadImage(
-    songs[i].thumbnail.split('?')[0],
+    `https://img.youtube.com/vi/${ids_by_completion[i]}/hqdefault.jpg`,
     `${outDir}/${title}.jpg`,
   );
 
@@ -138,6 +100,24 @@ const handleSong = async (
 };
 
 const ids = process.argv[2].split(',');
-ids.forEach((id) => YD.download(id));
+const ids_by_completion: string[] = [];
+
+ids.forEach(async (id) => {
+  const file = await downloader.downloadSong(id);
+  files.push(file);
+  ids_by_completion.push(id);
+  if (files.length !== ids.length) return;
+
+  const processedSongs = JSON.parse(
+    await prompt(`Print the pure titles and artists without feat/ft of the following songs in original order and the format [{"title":TITLE,"artist":ARTIST},...]
+  ${await translate(
+    files
+      .map((file) => file.split('/out/')[1].split('.mp3')[0].replace('_', ' '))
+      .join('\n'),
+  )}`),
+  ) as [];
+
+  await Promise.all(processedSongs.map(handleSong));
+});
 
 process.on('beforeExit', () => console.log(`$${cost.toFixed(5)} used`));

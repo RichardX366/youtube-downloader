@@ -11,7 +11,7 @@ const prompt = async (text) => {
   const {
     data: { choices },
   } = await openAI.createChatCompletion({
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4o-mini',
     messages: [
       {
         content: text,

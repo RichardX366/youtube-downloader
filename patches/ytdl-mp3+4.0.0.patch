@@ -1,0 +1,36 @@
+diff --git a/node_modules/ytdl-mp3/dist/index.cjs b/node_modules/ytdl-mp3/dist/index.cjs
+index 89d7d7b..96fe7cf 100644
+--- a/node_modules/ytdl-mp3/dist/index.cjs
++++ b/node_modules/ytdl-mp3/dist/index.cjs
+@@ -42,7 +42,7 @@ module.exports = __toCommonJS(src_exports);
+ var import_os = __toESM(require("os"), 1);
+ var import_path = __toESM(require("path"), 1);
+ var import_node_id3 = __toESM(require("node-id3"), 1);
+-var import_ytdl_core = __toESM(require("ytdl-core"), 1);
++var import_ytdl_core = __toESM(require("@distube/ytdl-core"), 1);
+ 
+ // src/FormatConverter.ts
+ var import_child_process = __toESM(require("child_process"), 1);
+diff --git a/node_modules/ytdl-mp3/dist/index.d.ts b/node_modules/ytdl-mp3/dist/index.d.ts
+index 9fd1c0a..0cd2a45 100644
+--- a/node_modules/ytdl-mp3/dist/index.d.ts
++++ b/node_modules/ytdl-mp3/dist/index.d.ts
+@@ -1,4 +1,4 @@
+-import { MoreVideoDetails } from 'ytdl-core';
++import { MoreVideoDetails } from '@distube/ytdl-core';
+ 
+ type DownloaderOptions = {
+     getTags?: boolean;
+diff --git a/node_modules/ytdl-mp3/dist/index.js b/node_modules/ytdl-mp3/dist/index.js
+index caf0391..0379d79 100644
+--- a/node_modules/ytdl-mp3/dist/index.js
++++ b/node_modules/ytdl-mp3/dist/index.js
+@@ -2,7 +2,7 @@
+ import os from "os";
+ import path from "path";
+ import NodeID3 from "node-id3";
+-import ytdl from "ytdl-core";
++import ytdl from "@distube/ytdl-core";
+ 
+ // src/FormatConverter.ts
+ import cp from "child_process";
