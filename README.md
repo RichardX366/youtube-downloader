@@ -1,7 +1,7 @@
 # How to Use
 
 1. Use `yarn && yarn build` to build the project. After building once you don't have to again.
-2. Put `KEY=DEEPL_KEY` and `OPENAI_API_KEY=OPENAI_API_KEY` into a .env file.
+2. Put `KEY=DEEPL_KEY` into a .env file.
 3. Use the command `yarn start VIDEO_IDS` to start it up. VIDEO_IDS is a comma separated list of the video IDs. You can get this from the video URL or for playlists, the below script.
 
 # Playlists
