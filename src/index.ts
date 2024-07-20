@@ -56,8 +56,6 @@ ids.forEach(async (id) => {
     .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 
-  renameSync(file, `${outDir}/${title}.mp3`);
-
   let thumbnail = {
     url: '',
     width: 0,
@@ -70,16 +68,19 @@ ids.forEach(async (id) => {
     }
   });
 
-  await downloadImage(thumbnail.url, `${outDir}/${title}.jpg`);
+  const thumbnailPath = file.replace('.mp3', '.jpg');
+
+  await downloadImage(thumbnail.url.split('?')[0], thumbnailPath);
 
   await id3.write(
     {
       title: title,
       artist: artist,
-      APIC: `${outDir}/${title}.jpg`,
-    } as any,
-    `${outDir}/${title}.mp3`,
+      image: thumbnailPath,
+    },
+    file,
   );
 
-  unlinkSync(`${outDir}/${title}.jpg`);
+  renameSync(file, `${outDir}/${title}.mp3`);
+  unlinkSync(thumbnailPath);
 });
