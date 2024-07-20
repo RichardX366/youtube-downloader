@@ -16,7 +16,6 @@
     "deepl": "^1.0.13",
     "dotenv": "^16.0.3",
     "node-id3": "^0.2.6",
-    "openai": "^3.2.1",
     "patch-package": "^8.0.0",
     "ytdl-core": "^4.11.5",
     "ytdl-mp3": "^4.0.0"
