@@ -55,7 +55,7 @@ ids.forEach(async (id) => {
 
   ffmpeg(file)
     .audioCodec('libmp3lame')
-    .audioBitrate(220)
+    .audioBitrate(128)
     .audioFilters([
       {
         filter: 'volume',
