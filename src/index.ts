@@ -1,16 +1,11 @@
 import { Downloader } from 'ytdl-mp3';
 import { Promise as id3 } from 'node-id3';
 import deepL from 'deepl';
-import {
-  renameSync,
-  createWriteStream,
-  unlinkSync,
-  mkdirSync,
-  existsSync,
-} from 'fs';
+import { createWriteStream, unlinkSync, mkdirSync, existsSync } from 'fs';
 import { config } from 'dotenv';
 import axios from 'axios';
 import ytdl from '@distube/ytdl-core';
+import ffmpeg from 'fluent-ffmpeg';
 
 const outDir = __dirname + '/../out';
 
@@ -56,31 +51,46 @@ ids.forEach(async (id) => {
     .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 
-  let thumbnail = {
-    url: '',
-    width: 0,
-    height: 0,
-  };
+  const newPath = `${outDir}/${title}.mp3`;
 
-  song.videoDetails.thumbnails.forEach((thumb) => {
-    if (thumb.width > thumbnail.width && thumb.url.includes('.jpg')) {
-      thumbnail = thumb;
-    }
-  });
+  ffmpeg(file)
+    .audioCodec('libmp3lame')
+    .audioBitrate(220)
+    .audioFilters([
+      {
+        filter: 'volume',
+        options:
+          8 - song.player_response.playerConfig.audioConfig.loudnessDb + 'dB',
+      },
+    ])
+    .save(newPath)
+    .on('end', async () => {
+      let thumbnail = {
+        url: '',
+        width: 0,
+        height: 0,
+      };
 
-  const thumbnailPath = file.replace('.mp3', '.jpg');
+      song.videoDetails.thumbnails.forEach((thumb) => {
+        if (thumb.width > thumbnail.width && thumb.url.includes('.jpg')) {
+          thumbnail = thumb;
+        }
+      });
 
-  await downloadImage(thumbnail.url.split('?')[0], thumbnailPath);
+      const thumbnailPath = file.replace('.mp3', '.jpg');
 
-  await id3.write(
-    {
-      title: title,
-      artist: artist,
-      image: thumbnailPath,
-    },
-    file,
-  );
+      await downloadImage(thumbnail.url.split('?')[0], thumbnailPath);
 
-  renameSync(file, `${outDir}/${title}.mp3`);
-  unlinkSync(thumbnailPath);
+      await id3.write(
+        {
+          title: title,
+          artist: artist,
+          image: thumbnailPath,
+        },
+        newPath,
+      );
+
+      unlinkSync(file);
+      unlinkSync(thumbnailPath);
+    });
 });
