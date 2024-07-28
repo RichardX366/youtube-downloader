@@ -7,7 +7,7 @@ import axios from 'axios';
 import ytdl from '@distube/ytdl-core';
 import ffmpeg from 'fluent-ffmpeg';
 
-const outDir = __dirname + '/../out';
+const outDir = __dirname.split('/').slice(0, -1).join('/') + '/out';
 
 config({ path: __dirname + '/../.env' });
 if (!existsSync(outDir)) mkdirSync(outDir);
@@ -49,7 +49,9 @@ ids.forEach(async (id) => {
   const title = (await translate(song.videoDetails.title))
     .split(' ')
     .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+    .join(' ')
+    .replaceAll('/', '')
+    .replaceAll('\\', '');
 
   const newPath = `${outDir}/${title}.mp3`;
 
