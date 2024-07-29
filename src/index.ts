@@ -1,7 +1,13 @@
 import { Downloader } from 'ytdl-mp3';
 import { Promise as id3 } from 'node-id3';
 import deepL from 'deepl';
-import { createWriteStream, unlinkSync, mkdirSync, existsSync } from 'fs';
+import {
+  createWriteStream,
+  unlinkSync,
+  mkdirSync,
+  existsSync,
+  renameSync,
+} from 'fs';
 import { config } from 'dotenv';
 import axios from 'axios';
 import ytdl from '@distube/ytdl-core';
@@ -53,7 +59,7 @@ ids.forEach(async (id) => {
     .replaceAll('/', '')
     .replaceAll('\\', '');
 
-  const newPath = `${outDir}/${title}.mp3`;
+  const newPath = `${outDir}/temp-${title}.mp3`;
 
   ffmpeg(file)
     .audioCodec('libmp3lame')
@@ -94,5 +100,6 @@ ids.forEach(async (id) => {
 
       unlinkSync(file);
       unlinkSync(thumbnailPath);
+      renameSync(newPath, newPath.replace('temp-', ''));
     });
 });
