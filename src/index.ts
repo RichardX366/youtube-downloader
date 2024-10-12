@@ -13,9 +13,12 @@ import axios from 'axios';
 import ytdl from '@distube/ytdl-core';
 import ffmpeg from 'fluent-ffmpeg';
 
-const outDir = __dirname.split('/').slice(0, -1).join('/') + '/out';
-
 config({ path: __dirname + '/../.env' });
+
+const outDir =
+  process.env.OUTPUT_PATH ||
+  __dirname.split('/').slice(0, -1).join('/') + '/out';
+
 if (!existsSync(outDir)) mkdirSync(outDir);
 
 const downloader = new Downloader({
@@ -47,59 +50,63 @@ const downloadImage = async (url: string, path: string) => {
 
 const ids = process.argv[2].split(',');
 
-ids.forEach(async (id) => {
-  const file = await downloader.downloadSong(id);
-  const song = await ytdl.getInfo(id);
+const main = async () => {
+  for (const id of ids) {
+    const file = await downloader.downloadSong(id);
+    const song = await ytdl.getInfo(id);
 
-  const artist = await translate(song.videoDetails.author.name);
-  const title = (await translate(song.videoDetails.title))
-    .split(' ')
-    .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ')
-    .replaceAll('/', '')
-    .replaceAll('\\', '');
+    const artist = await translate(song.videoDetails.author.name);
+    const title = (await translate(song.videoDetails.title))
+      .split(' ')
+      .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
+      .replaceAll('/', '')
+      .replaceAll('\\', '');
 
-  const newPath = `${outDir}/temp-${title}.mp3`;
+    const newPath = `${outDir}/temp-${title}.mp3`;
 
-  ffmpeg(file)
-    .audioCodec('libmp3lame')
-    .audioBitrate(128)
-    .audioFilters([
-      {
-        filter: 'volume',
-        options:
-          8 - song.player_response.playerConfig.audioConfig.loudnessDb + 'dB',
-      },
-    ])
-    .save(newPath)
-    .on('end', async () => {
-      let thumbnail = {
-        url: '',
-        width: 0,
-        height: 0,
-      };
-
-      song.videoDetails.thumbnails.forEach((thumb) => {
-        if (thumb.width > thumbnail.width && thumb.url.includes('.jpg')) {
-          thumbnail = thumb;
-        }
-      });
-
-      const thumbnailPath = file.replace('.mp3', '.jpg');
-
-      await downloadImage(thumbnail.url.split('?')[0], thumbnailPath);
-
-      await id3.write(
+    ffmpeg(file)
+      .audioCodec('libmp3lame')
+      .audioBitrate(128)
+      .audioFilters([
         {
-          title: title,
-          artist: artist,
-          image: thumbnailPath,
+          filter: 'volume',
+          options:
+            8 - song.player_response.playerConfig.audioConfig.loudnessDb + 'dB',
         },
-        newPath,
-      );
+      ])
+      .save(newPath)
+      .on('end', async () => {
+        let thumbnail = {
+          url: '',
+          width: 0,
+          height: 0,
+        };
 
-      unlinkSync(file);
-      unlinkSync(thumbnailPath);
-      renameSync(newPath, newPath.replace('temp-', ''));
-    });
-});
+        song.videoDetails.thumbnails.forEach((thumb) => {
+          if (thumb.width > thumbnail.width && thumb.url.includes('.jpg')) {
+            thumbnail = thumb;
+          }
+        });
+
+        const thumbnailPath = file.replace('.mp3', '.jpg');
+
+        await downloadImage(thumbnail.url.split('?')[0], thumbnailPath);
+
+        await id3.write(
+          {
+            title: title,
+            artist: artist,
+            image: thumbnailPath,
+          },
+          newPath,
+        );
+
+        unlinkSync(file);
+        unlinkSync(thumbnailPath);
+        renameSync(newPath, newPath.replace('temp-', ''));
+      });
+  }
+};
+
+main();
