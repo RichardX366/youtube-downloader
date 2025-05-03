@@ -1,8 +1,8 @@
 # How to Use
 
 1. Use `yarn && yarn build` to build the project. After building once you don't have to again.
-2. Put `KEY=DEEPL_KEY` into a .env file.
-3. Use the command `yarn start VIDEO_IDS` to start it up. VIDEO_IDS is a comma separated list of the video IDs. You can get this from the video URL or for playlists, the below script.
+2. Put `DEEPL_KEY=INSERT_YOUR_DEEPL_KEY` into a .env file.
+3. Use the command `yarn start` to start it up. This will open a server on `localhost:3005`.
 
 # Playlists
 
@@ -19,4 +19,5 @@ console.log(links.join(','));
 # Shortcut
 
 1. Add `alias yt-downloader="node ~/PROJECT_ROOT/dist"` to your .bashrc or .zshrc
-2. Run `yt-downloader VIDEO_IDS` to download the videos and generate the subtitles
+2. Run `yt-downloader` to start the server
+3. Open `localhost:3005` in your browser

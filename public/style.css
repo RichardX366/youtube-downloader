@@ -1,0 +1,98 @@
+html {
+  background-color: #112;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 75vh;
+}
+
+input {
+  background-color: #223;
+  border: #444 solid 2px;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 16px;
+  color: white;
+  outline: none;
+  width: 800px;
+}
+
+h1 {
+  font-size: 48px;
+  font-weight: 400;
+  margin-bottom: 0px;
+}
+
+input:active,
+input:focus {
+  border: white solid 2px;
+}
+
+button {
+  background-color: #003366;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-left: 8px;
+}
+
+button:hover {
+  background-color: #0055aa;
+}
+
+img {
+  width: 160px;
+  height: 160px;
+  margin: auto;
+  object-fit: cover;
+  margin-bottom: -4px;
+}
+
+img:hover {
+  filter: brightness(50%);
+  transition: filter 0.2s ease;
+  cursor: pointer;
+}
+
+table,
+th,
+td {
+  border-collapse: collapse;
+  border: 1px solid white;
+  margin: 24px auto;
+  padding: 8px;
+  border-radius: 12px;
+}
+
+table input {
+  width: 700px;
+  border: none;
+  margin: -8px;
+  border-radius: 0px;
+}
+
+table input:active,
+table input:focus {
+  border: none;
+}
+
+table button {
+  margin-left: 0px;
+}
+
+#song button {
+  margin: -8px;
+  width: 724px;
+  border-radius: 0px;
+}
+
+input[type='file'] {
+  display: none;
+}

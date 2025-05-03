@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Navidrome YouTube Downloader</title>
+    <link href="style.css" rel="stylesheet" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="https://navidrome.richardxiong.com/app/favicon-32x32.png"
+    />
+  </head>
+  <body>
+    <h1>Navidrome YouTube Downloader</h1>
+    <p>Download songs from YouTube onto the Navidrome song directory.</p>
+    <input placeholder="YouTube Link" id="yt-link" />
+    <button id="fetch">Fetch</button>
+    <table id="song" style="display: none">
+      <thead>
+        <tr>
+          <th>Thumbnail</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td rowspan="4">
+            <input type="file" id="thumbnail" accept="image/*" />
+            <label for="thumbnail">
+              <img alt="thumbnail" />
+            </label>
+          </td>
+          <td>
+            <input placeholder="Title" id="title" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input placeholder="Artist" id="artist" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input placeholder="Album" id="album" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <button>Download</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <script src="script.js"></script>
+  </body>
+</html>

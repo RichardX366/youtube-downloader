@@ -1,112 +1,20 @@
-import { Downloader } from 'ytdl-mp3';
-import { Promise as id3 } from 'node-id3';
-import deepL from 'deepl';
-import {
-  createWriteStream,
-  unlinkSync,
-  mkdirSync,
-  existsSync,
-  renameSync,
-} from 'fs';
+import express from 'express';
+import attachMiddleware, { handleError } from 'rx-express-middleware';
 import { config } from 'dotenv';
-import axios from 'axios';
-import ytdl from '@distube/ytdl-core';
-import ffmpeg from 'fluent-ffmpeg';
 
-config({ path: __dirname + '/../.env' });
-
-const outDir =
-  process.env.OUTPUT_PATH ||
-  __dirname.split('/').slice(0, -1).join('/') + '/out';
-
-if (!existsSync(outDir)) mkdirSync(outDir);
-
-const downloader = new Downloader({
-  outputDir: outDir,
+config({
+  path: __dirname + '/../.env',
 });
 
-const translate = async (text: string) => {
-  const { data } = await deepL({
-    free_api: true,
-    text,
-    target_lang: 'EN',
-    auth_key: process.env.KEY as string,
-  });
-  return data.translations[0].text;
-};
+export const app = express();
+attachMiddleware(app);
 
-const downloadImage = async (url: string, path: string) => {
-  const { data: response } = (await axios({
-    method: 'GET',
-    url,
-    responseType: 'stream',
-  })) as { data: NodeJS.ReadableStream };
+import baseRouter from './routes';
 
-  const stream = createWriteStream(path);
-  response.pipe(stream);
+app.use(baseRouter);
 
-  return new Promise<void>((res) => stream.on('finish', res));
-};
+app.use(handleError());
 
-const ids = process.argv[2].split(',');
-
-const main = async () => {
-  for (const id of ids) {
-    const file = await downloader.downloadSong(id);
-    const song = await ytdl.getInfo(id);
-
-    const artist = await translate(song.videoDetails.author.name);
-    const title = (await translate(song.videoDetails.title))
-      .split(' ')
-      .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ')
-      .replaceAll('/', '')
-      .replaceAll('\\', '');
-
-    const newPath = `${outDir}/temp-${title}.mp3`;
-
-    ffmpeg(file)
-      .audioCodec('libmp3lame')
-      .audioBitrate(128)
-      .audioFilters([
-        {
-          filter: 'volume',
-          options:
-            8 - song.player_response.playerConfig.audioConfig.loudnessDb + 'dB',
-        },
-      ])
-      .save(newPath)
-      .on('end', async () => {
-        let thumbnail = {
-          url: '',
-          width: 0,
-          height: 0,
-        };
-
-        song.videoDetails.thumbnails.forEach((thumb) => {
-          if (thumb.width > thumbnail.width && thumb.url.includes('.jpg')) {
-            thumbnail = thumb;
-          }
-        });
-
-        const thumbnailPath = file.replace('.mp3', '.jpg');
-
-        await downloadImage(thumbnail.url.split('?')[0], thumbnailPath);
-
-        await id3.write(
-          {
-            title: title,
-            artist: artist,
-            image: thumbnailPath,
-          },
-          newPath,
-        );
-
-        unlinkSync(file);
-        unlinkSync(thumbnailPath);
-        renameSync(newPath, newPath.replace('temp-', ''));
-      });
-  }
-};
-
-main();
+app.listen(process.env.PORT || 3005, () =>
+  console.log(`Open the website: http://localhost:${process.env.PORT || 3005}`),
+);
